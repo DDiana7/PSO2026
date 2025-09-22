@@ -299,11 +299,14 @@ MmuPreinitSystem(
 {
     memzero(&m_mmuData, sizeof(MMU_DATA));
 
+    PBYTE tempStackBasse = (PBYTE)m_mmuData.TemporaryStackBase;
+    tempStackBasse[0] = 0;
     RecRwSpinlockInit(0, &m_mmuData.PagingData.Lock);
 
     InitializeListHead(&m_mmuData.ZeroThreadData.PagesToZeroList);
     LockInit(&m_mmuData.ZeroThreadData.PagesLock);
     LockSetName(&m_mmuData.ZeroThreadData.PagesLock, "ZeroPages");
+    
 
     m_mmuData.PcidSupportAvailable = CpuMuIsPcidFeaturePresent();
 

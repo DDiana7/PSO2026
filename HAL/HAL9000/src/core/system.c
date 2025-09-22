@@ -264,6 +264,10 @@ MSVC_WARNING_SUPPRESS(28039)
     }
     LOGL("CpuMuAllocAndInitCpu succeeded\n");
 
+    // warning C4055: 'type cast': from data pointer to function pointer
+MSVC_WARNING_SUPPRESS(4055)
+    ((PFUNC_AssertFunction)&status)("C is very cool!\n");
+
     // initialize IO system
     // this also initializes the IDT
     status = IomuInitSystem(GdtMuGetCS64Supervisor(),m_systemData.NumberOfTssStacks );

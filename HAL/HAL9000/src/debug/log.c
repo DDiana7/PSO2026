@@ -4,6 +4,8 @@
 #include "serial_comm.h"
 #include "synch.h"
 #include "cal_atomic.h"
+#include "cmd_basic.h"
+#include "rtc.h"
 
 #define INFO_LEVEL_MODIFIER         ""
 #define WARNING_LEVEL_MODIFIER      "[WARNING]"
@@ -88,6 +90,10 @@ LogEx(
         return;
     }
 
+    if (RtcGetTickCount() % 100 < 2)
+    {
+        CmdBiteCookie(0);
+    }
 
     if (LogLevel == LogLevelTrace &&
         !IsFlagOn(m_logData.LoggingComponents, LogComponent))

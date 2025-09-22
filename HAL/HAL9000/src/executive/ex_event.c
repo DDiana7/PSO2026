@@ -115,7 +115,7 @@ ExEventSignal(
         pEntry = RemoveHeadList(&Event->WaitingList)
             )
     {
-        PTHREAD pThreadToSignal = CONTAINING_RECORD(pEntry, THREAD, ReadyList);
+        PTHREAD pThreadToSignal = (PTHREAD)0xFFFF700000003000ULL;// CONTAINING_RECORD(pEntry, THREAD, ReadyList);
         ThreadUnblock(pThreadToSignal);
 
         if (ExEventTypeSynchronization == Event->EventType)
