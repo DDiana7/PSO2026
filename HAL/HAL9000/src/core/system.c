@@ -115,7 +115,7 @@ SystemInit(
     kernelBaseAddress = (PVOID) ((QWORD) BootInformation->KernelBaseAddress);
     kernelSize = BootInformation->KernelSize;
 
-    LogSystemInit(LogLevelInfo,
+    LogSystemInit(LogLevelError,
                   LogComponentInterrupt | LogComponentIo | LogComponentAcpi | LogComponentUserMode,
                   TRUE
                   );
@@ -265,6 +265,7 @@ MSVC_WARNING_SUPPRESS(28039)
     LOGL("CpuMuAllocAndInitCpu succeeded\n");
 
     // initialize IO system
+    LogSetLevel (LogLevelInfo);
     // this also initializes the IDT
     status = IomuInitSystem(GdtMuGetCS64Supervisor(),m_systemData.NumberOfTssStacks );
     if (!SUCCEEDED(status))
@@ -377,6 +378,7 @@ MSVC_WARNING_SUPPRESS(28039)
     return status;
 }
 
+LogSetLevel(LOG_Trace);
 void
 SystemUninit(
     void

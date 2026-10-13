@@ -15,7 +15,7 @@
 #include "cal_assembly.h"
 #include "cal_seh.h"
 
-#define TID_INCREMENT               4
+#define TID_INCREMENT               0x10
 
 #define THREAD_TIME_SLICE           1
 
@@ -42,6 +42,10 @@ typedef struct _THREAD_SYSTEM_DATA
 
     _Guarded_by_(ReadyThreadsLock)
     LIST_ENTRY          ReadyThreadsList;
+
+    QWORD threadCounter;
+
+    int parentTID;
 } THREAD_SYSTEM_DATA, *PTHREAD_SYSTEM_DATA;
 
 // DO NOT CHANGE THE NAME OF THIS VARIABLE
@@ -193,7 +197,10 @@ ThreadSystemInitMainForCurrentCPU(
 
     snprintf( mainThreadName, MAX_PATH, "%s-%02x", "main", pCpu->ApicId );
 
-    status = _ThreadInit(mainThreadName, ThreadPriorityDefault, &pThread, FALSE);
+    //status = _ThreadInit(mainThreadName, ThreadPriorityDefault, &pThread, FALSE);
+    status = _ThreadInit(mainThreadName, ThreadPriorityDefault, NULL, FALSE);
+
+
     if (!SUCCEEDED(status))
     {
         LOG_FUNC_ERROR("_ThreadInit", status );
@@ -225,6 +232,7 @@ ThreadSystemInitIdleForCurrentCPU(
     void
     )
 {
+    int idleThreadTid;
     EX_EVENT idleStarted;
     STATUS status;
     PPCPU pCpu;
@@ -252,7 +260,8 @@ ThreadSystemInitIdleForCurrentCPU(
     snprintf(idleThreadName, MAX_PATH, "%s-%02x", "idle", pCpu->ApicId);
 
     // create idle thread
-    status = ThreadCreate(idleThreadName,
+    status = ThreadCreate(idleThreadTid,
+                          idleThreadName,
                           ThreadPriorityDefault,
                           _IdleThread,
                           &idleStarted,
@@ -289,6 +298,7 @@ ThreadSystemInitIdleForCurrentCPU(
 
 STATUS
 ThreadCreate(
+    IN          int                 Tid,
     IN_Z        char*               Name,
     IN          THREAD_PRIORITY     Priority,
     IN          PFUNC_ThreadStart   Function,
@@ -296,6 +306,8 @@ ThreadCreate(
     OUT_PTR     PTHREAD*            Thread
     )
 {
+    LOG("MESAJ: Thread created with name = %s and tid = %d ", Name, Tid);
+    m_threadSystemData.threadCounter += 1;
     return ThreadCreateEx(Name,
                           Priority,
                           Function,
@@ -596,6 +608,8 @@ ThreadExit(
 
     LockAcquire(&m_threadSystemData.ReadyThreadsLock, &oldState);
     _ThreadSchedule();
+
+    m_threadSystemData.threadCounter -= 1;
     NOT_REACHED;
 }
 
